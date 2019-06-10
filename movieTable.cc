@@ -15,31 +15,24 @@ using namespace table;
 unsigned int movieTable::rows() const
 { return table.size(); }
 
-string movieTable::display(movie &dis) const
+string movieTable::display(unsigned int rowN) const
 {
-	ostringstream out;
-	out << dis.title << " | "
-	    << dis.director << " | "
-	    << dis.year << " | "
-	    << dis.num << " | "
-	    << dis.country << '\n';
+	if (rowN >= rows()) { // check to ensure passed index is with the used rows
+		return "ERROR: invalid row index\n";
+	}
+	ostringstream out; //stream to construct movie to_string
+	out << table.at(rowN).title << " | "
+	    << table.at(rowN).director << " | "
+	    << table.at(rowN).year << " | "
+	    << table.at(rowN).oscar << " | "
+	    << table.at(rowN).country << '\n';
 	return out.str();
 }
 bool movieTable::add(movie &addition)
 {
-
 	unsigned int previous = rows(); //size before add attempt
 	table.push_back(addition); //add movie to end of vector
 	return previous < rows(); //return if the table grew or not
-}
-
-movie *movieTable::get(unsigned int rowN)
-{
-	if (rowN >= rows()) { // check to ensure passed index is with the used rows
-		//cout << "Error: Row " << rowN << " does not exist." << endl;
-		return nullptr;
-	}
-	return &table.at(rowN);
 }
 
 bool movieTable::loadCSV(const char *infn)
@@ -49,7 +42,7 @@ bool movieTable::loadCSV(const char *infn)
 	vector<movie> additions; //vector of movies to add
 
 	if (!input) { //checks if file opened
-		cout << "ERROR: Failed to open " << infn << endl;
+		cerr << "ERROR: Failed to open " << infn << endl;
 		return false;
 	}
 	try { //attempts parsing
@@ -67,14 +60,14 @@ bool movieTable::loadCSV(const char *infn)
 			strcpy(a.title, title.c_str()); //copies title(converted) to field
 			strcpy(a.director, director.c_str()); //copies director(converted) to field
 			a.year = (unsigned short)stoul(year); //converts string -> ulong cast and assigned to field
-			a.num = stoul(num); //converts string -> ulong, assigned to field
+			a.oscar = stoul(num); //converts string -> ulong, assigned to field
 			strcpy(a.country, country.c_str()); //copies country(converted) to field
 
 			additions.push_back(a); //add to additions vector
 		}
 	}
 	catch (...) { //if for what ever reason, parsing failed, say so and return
-		cout << "Error parsing file, check formatting\n";
+		cerr << "Error parsing file, check formatting\n";
 		return false;
 	}
 	//if parsing was successful add them to the table
